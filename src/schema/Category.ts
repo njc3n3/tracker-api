@@ -11,6 +11,7 @@ import {
 import {ExerciseType} from './Exercise';
 import Exercise from '../models/Exercise';
 import Category from '../models/Category';
+import {filterOutFalsies} from '../utils';
 
 // Category Type
 export const CategoryType: GraphQLObjectType = new GraphQLObjectType({
@@ -94,8 +95,14 @@ export const CategoryMutations: Thunk<GraphQLFieldConfigMap<any, any, any>> = {
       category: {type: new GraphQLNonNull(CategoryUpdateInputType)},
     },
     resolve(_parent, args) {
-      const {id, name, desc} = args;
-      return Category.findByIdAndUpdate({_id: id}, {name, desc}, {new: true});
+      const {id, name, desc} = args.category;
+      return Category.findByIdAndUpdate(
+        {_id: id},
+        filterOutFalsies({name, desc}),
+        {
+          new: true,
+        },
+      );
     },
   },
 };
