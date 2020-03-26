@@ -98,6 +98,27 @@ const Mutation = new GraphQLObjectType({
         return category.save();
       },
     },
+    removeCategory: {
+      type: CategoryType,
+      args: {
+        id: {type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(_parent, args) {
+        return Category.findByIdAndDelete(args.id);
+      },
+    },
+    updateCategory: {
+      type: CategoryType,
+      args: {
+        id: {type: new GraphQLNonNull(GraphQLString)},
+        name: {type: GraphQLString},
+        desc: {type: GraphQLString},
+      },
+      resolve(_parent, args) {
+        const {id, name, desc} = args;
+        return Category.findByIdAndUpdate({_id: id}, {name, desc}, {new: true});
+      },
+    },
     addExercise: {
       type: ExerciseType,
       args: {
@@ -111,6 +132,32 @@ const Mutation = new GraphQLObjectType({
         });
 
         return exercise.save();
+      },
+    },
+    removeExercise: {
+      type: ExerciseType,
+      args: {
+        id: {type: new GraphQLNonNull(GraphQLString)},
+      },
+      resolve(_parent, args) {
+        return Exercise.findByIdAndDelete(args.id);
+      },
+    },
+    updateExercise: {
+      type: ExerciseType,
+      args: {
+        id: {type: new GraphQLNonNull(GraphQLString)},
+        name: {type: GraphQLString},
+        desc: {type: GraphQLString},
+        categoryId: {type: GraphQLID},
+      },
+      resolve(_parent, args) {
+        const {id, name, desc, categoryId} = args;
+        return Exercise.findByIdAndUpdate(
+          {_id: id},
+          {name, desc, categoryId},
+          {new: true},
+        );
       },
     },
   },
