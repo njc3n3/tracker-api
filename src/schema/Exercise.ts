@@ -88,7 +88,7 @@ export const ExerciseMutations: Thunk<GraphQLFieldConfigMap<any, any, any>> = {
   removeExercise: {
     type: ExerciseType,
     args: {
-      id: {type: new GraphQLNonNull(GraphQLString)},
+      id: {type: new GraphQLNonNull(GraphQLID)},
     },
     resolve(_parent, args) {
       return Exercise.findByIdAndDelete(args.id);

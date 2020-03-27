@@ -83,7 +83,7 @@ export const CategoryMutations: Thunk<GraphQLFieldConfigMap<any, any, any>> = {
   removeCategory: {
     type: CategoryType,
     args: {
-      id: {type: new GraphQLNonNull(GraphQLString)},
+      id: {type: new GraphQLNonNull(GraphQLID)},
     },
     resolve(_parent, args) {
       return Category.findByIdAndDelete(args.id);
