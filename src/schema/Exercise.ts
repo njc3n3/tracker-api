@@ -79,7 +79,7 @@ export const ExerciseMutations: Thunk<GraphQLFieldConfigMap<any, any, any>> = {
     },
     resolve(_parent, args) {
       const exercise = new Exercise({
-        ...args,
+        ...args.exercise,
       });
 
       return exercise.save();
