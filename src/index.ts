@@ -1,9 +1,6 @@
-import express from 'express';
-import graphqlHTTP from 'express-graphql';
-import schema from './schema/schema';
 import mongoose from 'mongoose';
-
-const app = express();
+import {ApolloServer} from 'apollo-server';
+import {typeDefs, resolvers} from './schema';
 
 mongoose.connect(
   'mongodb://tracker:tracker123@ds147942.mlab.com:47942/lift-tracker-gql',
@@ -18,14 +15,9 @@ mongoose.connection.once('open', () => {
   console.log('Connected to database');
 });
 
-app.use(
-  '/graphql',
-  graphqlHTTP({
-    schema,
-    graphiql: true,
-  }),
-);
+const server = new ApolloServer({typeDefs, resolvers});
 
-app.listen(4000);
-// tslint:disable-next-line: no-console
-console.log('Running a GraphQL API server at http://localhost:4000/graphql');
+server.listen().then(({url}) => {
+  // tslint:disable-next-line: no-console
+  console.log(`Server ready at ${url}`);
+});
