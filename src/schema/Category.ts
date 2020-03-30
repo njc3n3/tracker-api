@@ -86,6 +86,11 @@ export const CategoryMutations: Thunk<GraphQLFieldConfigMap<any, any, any>> = {
       id: {type: new GraphQLNonNull(GraphQLID)},
     },
     resolve(_parent, args) {
+      Exercise.deleteMany(
+        {categoryId: args.id},
+        // tslint:disable-next-line: no-empty
+        () => {}, // Mongoose won't delete without a return function
+      );
       return Category.findByIdAndDelete(args.id);
     },
   },
