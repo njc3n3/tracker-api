@@ -15,7 +15,12 @@ mongoose.connection.once('open', () => {
   console.log('Connected to database');
 });
 
-const server = new ApolloServer({typeDefs, resolvers});
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: true, // TODO turn off when released
+  playground: true, // TODO turn off when released
+});
 
 server.listen().then(({url}) => {
   // tslint:disable-next-line: no-console
