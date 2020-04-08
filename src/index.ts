@@ -3,7 +3,7 @@ import {ApolloServer} from 'apollo-server';
 import {typeDefs, resolvers} from './schema';
 
 mongoose.connect(
-  'mongodb://tracker:tracker123@ds147942.mlab.com:47942/lift-tracker-gql', // TODO replace with environment variables and new username and password
+  `mongodb://tracker:${process.env.TRACKER_DB_PW}@ds147942.mlab.com:47942/lift-tracker-gql`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -18,8 +18,6 @@ mongoose.connection.once('open', () => {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  introspection: true, // TODO turn off when released
-  playground: true, // TODO turn off when released
 });
 
 server.listen().then(({url}) => {
