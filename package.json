@@ -4,28 +4,26 @@
   "description": "Workout tracker graphql api",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
-    "prestart": "npm run build",
+    "prestart": "yarn run build",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:dev": "tsc --watch --preserveWatchOutput",
-    "start:dev": "nodemon dist/",
-    "dev": "concurrently \"npm:build:dev\" \"npm:start:dev\""
+    "prebuild:dev": "tslint -c tslint.json -p tsconfig.json --fix",
+    "build:dev": "tsc",
+    "prestart:dev": "yarn run build:dev",
+    "start:dev": "node ."
   },
   "author": "Nick Coffey",
   "license": "MIT",
   "dependencies": {
     "apollo-server": "^2.11.0",
     "graphql": "^14.6.0",
-    "mongoose": "^5.9.6",
-    "tslint": "^6.1.0"
+    "mongoose": "^5.9.6"
   },
   "devDependencies": {
     "@types/mongoose": "^5.7.7",
     "@types/node": "^12.12.31",
-    "concurrently": "^5.1.0",
-    "nodemon": "^2.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "tslint": "^6.1.0"
   }
 }
