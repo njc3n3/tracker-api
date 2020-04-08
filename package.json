@@ -4,7 +4,8 @@
   "description": "Workout tracker graphql api",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "tsc": "tsc",
+    "build": "yarn run tsc",
     "prestart": "yarn run build",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1",

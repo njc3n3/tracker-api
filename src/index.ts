@@ -20,6 +20,7 @@ const server = new ApolloServer({
   resolvers,
 });
 
+// TODO add NODE_ENV to heroku
 server.listen().then(({url}) => {
   // tslint:disable-next-line: no-console
   console.log(`Server ready at ${url}`);
