@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "tsc": "tsc",
-    "build": "yarn run tsc",
-    "prestart": "yarn run build",
+    "postinstall": "yarn run tsc",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild:dev": "tslint -c tslint.json -p tsconfig.json --fix",
