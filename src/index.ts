@@ -18,10 +18,12 @@ mongoose.connection.once('open', () => {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  introspection: true, // TODO remove when released
+  playground: true, // TODO remove when released
 });
 
 // TODO add NODE_ENV to heroku
-server.listen().then(({url}) => {
+server.listen({port: process.env.PORT || 4000}).then(({url}) => {
   // tslint:disable-next-line: no-console
   console.log(`Server ready at ${url}`);
 });
