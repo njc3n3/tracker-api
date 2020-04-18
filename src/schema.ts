@@ -97,8 +97,8 @@ export const typeDefs = gql`
   }
 
   input WorkoutSetCreateInput {
-    weight: Float!
-    repetitions: Int!
+    weight: Float
+    repetitions: Int
     workoutExerciseId: ID!
   }
 
@@ -225,8 +225,8 @@ export const resolvers: IResolvers<any, any> = {
       return workout.save();
     },
     removeWorkout: (_parent, args) => {
-      WorkoutExercise.find({workoutId: args.id}).then(workoutExercises => {
-        workoutExercises.forEach(workoutExercise => {
+      WorkoutExercise.find({workoutId: args.id}).then((workoutExercises) => {
+        workoutExercises.forEach((workoutExercise) => {
           WorkoutSet.deleteMany(
             {workoutExerciseId: workoutExercise.id},
             // tslint:disable-next-line: no-empty
@@ -289,17 +289,17 @@ export const resolvers: IResolvers<any, any> = {
       );
     },
   },
-  Category: {exercises: parent => Exercise.find({categoryId: parent.id})},
-  Exercise: {category: parent => Category.findById(parent.categoryId)},
+  Category: {exercises: (parent) => Exercise.find({categoryId: parent.id})},
+  Exercise: {category: (parent) => Category.findById(parent.categoryId)},
   Workout: {
-    workoutExercises: parent => WorkoutExercise.find({workoutId: parent.id}),
+    workoutExercises: (parent) => WorkoutExercise.find({workoutId: parent.id}),
   },
   WorkoutExercise: {
-    workout: parent => Workout.findById(parent.workoutId),
-    workoutSets: parent => WorkoutSet.find({workoutExerciseId: parent.id}),
+    workout: (parent) => Workout.findById(parent.workoutId),
+    workoutSets: (parent) => WorkoutSet.find({workoutExerciseId: parent.id}),
   },
   WorkoutSet: {
-    workoutExercise: parent =>
+    workoutExercise: (parent) =>
       WorkoutExercise.findById(parent.workoutExerciseId),
   },
 };

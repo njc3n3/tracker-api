@@ -1,11 +1,11 @@
-import mongoose, {Schema} from 'mongoose';
+import mongoose, {Schema} from 'mongoose'
 
 const workoutSetSchema = new Schema({
   weight: Number,
   repetitions: Number,
-  workoutExerciseId: String,
-});
+  workoutExerciseId: String
+})
 
-const WorkoutSet = mongoose.model('WorkoutSet', workoutSetSchema);
+const WorkoutSet = mongoose.model('WorkoutSet', workoutSetSchema)
 
-export default WorkoutSet;
+export default WorkoutSet
