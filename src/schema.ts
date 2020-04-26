@@ -1,10 +1,10 @@
-import {gql, IResolvers} from 'apollo-server';
-import Category from './models/Category';
-import Exercise from './models/Exercise';
-import Workout from './models/Workout';
-import WorkoutExercise from './models/WorkoutExercise';
-import WorkoutSet from './models/WorkoutSet';
-import {filterOutFalsies} from './utils';
+import {gql, IResolvers} from 'apollo-server'
+import Category from './models/Category'
+import Exercise from './models/Exercise'
+import Workout from './models/Workout'
+import WorkoutExercise from './models/WorkoutExercise'
+import WorkoutSet from './models/WorkoutSet'
+import {filterOutFalsies} from './utils'
 
 export const typeDefs = gql`
   ### CATEGORY ###
@@ -53,11 +53,6 @@ export const typeDefs = gql`
     startTime: String
     endTime: String
     workoutExercises: [WorkoutExercise]
-  }
-
-  input WorkoutCreateInput {
-    startTime: String!
-    endTime: String
   }
 
   input WorkoutUpdateInput {
@@ -139,23 +134,20 @@ export const typeDefs = gql`
     removeExercise(id: ID!): Exercise
     updateExercise(exercise: ExerciseUpdateInput!): Exercise
     # WORKOUT
-    addWorkout(workout: WorkoutCreateInput!): Workout
+    addWorkout: Workout
     removeWorkout(id: ID!): Workout
     updateWorkout(workout: WorkoutUpdateInput!): Workout
+    stopWorkout(id: ID!): Workout
     # WORKOUT_EXERCISE
-    addWorkoutExercise(
-      workoutExercise: CreateWorkoutExerciseInput!
-    ): WorkoutExercise
+    addWorkoutExercise(workoutExercise: CreateWorkoutExerciseInput!): WorkoutExercise
     removeWorkoutExercise(id: ID!): WorkoutExercise
-    updateWorkoutExercise(
-      workoutExercise: UpdateWorkoutExerciseInput!
-    ): WorkoutExercise
+    updateWorkoutExercise(workoutExercise: UpdateWorkoutExerciseInput!): WorkoutExercise
     # WORKOUT_SET
     addWorkoutSet(workoutSet: WorkoutSetCreateInput!): WorkoutSet
     removeWorkoutSet(id: ID!): WorkoutSet
     updateWorkoutSet(workoutSet: WorkoutSetUpdateInput!): WorkoutSet
   }
-`;
+`
 
 export const resolvers: IResolvers<any, any> = {
   Query: {
@@ -170,59 +162,49 @@ export const resolvers: IResolvers<any, any> = {
     workouts: () => Workout.find(),
     // WORKOUT_EXERCISE
     workoutExercise: (_parent, args) => WorkoutExercise.findById(args.id),
-    workoutExercises: (_parent, args) =>
-      WorkoutExercise.find({workoutId: args.workoutId}),
+    workoutExercises: (_parent, args) => WorkoutExercise.find({workoutId: args.workoutId}),
     // WORKOUT_SET
     workoutSet: (_parent, args) => WorkoutSet.findById(args.id),
-    workoutSets: (_parent, args) =>
-      WorkoutSet.find({workoutExerciseId: args.workoutExerciseId}),
+    workoutSets: (_parent, args) => WorkoutSet.find({workoutExerciseId: args.workoutExerciseId})
   },
   Mutation: {
     // CATEGORY
     addCategory: (_parent, args) => {
       const category = new Category({
-        ...args.category,
-      });
-      return category.save();
+        ...args.category
+      })
+      return category.save()
     },
     removeCategory: (_parent, args) => {
       Exercise.deleteMany(
         {categoryId: args.id},
         // tslint:disable-next-line: no-empty
-        () => {}, // Mongoose won't delete without a return function
-      );
-      return Category.findByIdAndDelete(args.id);
+        () => {} // Mongoose won't delete without a return function
+      )
+      return Category.findByIdAndDelete(args.id)
     },
     updateCategory: (_parent, args) => {
-      const {id, name, desc} = args.category;
-      return Category.findByIdAndUpdate(
-        {_id: id},
-        filterOutFalsies({name, desc}),
-        {new: true},
-      );
+      const {id, name, desc} = args.category
+      return Category.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc}), {new: true})
     },
     // EXERCISE
     addExercise: (_parent, args) => {
       const exercise = new Exercise({
-        ...args.exercise,
-      });
-      return exercise.save();
+        ...args.exercise
+      })
+      return exercise.save()
     },
     removeExercise: (_parent, args) => Exercise.findByIdAndDelete(args.id),
     updateExercise: (_parent, args) => {
-      const {id, name, desc, categoryId} = args.exercise;
-      return Exercise.findByIdAndUpdate(
-        {_id: id},
-        filterOutFalsies({name, desc, categoryId}),
-        {new: true},
-      );
+      const {id, name, desc, categoryId} = args.exercise
+      return Exercise.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc, categoryId}), {new: true})
     },
     // WORKOUT
-    addWorkout: (_parent, args) => {
+    addWorkout: () => {
       const workout = new Workout({
-        ...args.workout,
-      });
-      return workout.save();
+        startTime: new Date()
+      })
+      return workout.save()
     },
     removeWorkout: (_parent, args) => {
       WorkoutExercise.find({workoutId: args.id}).then((workoutExercises) => {
@@ -230,76 +212,68 @@ export const resolvers: IResolvers<any, any> = {
           WorkoutSet.deleteMany(
             {workoutExerciseId: workoutExercise.id},
             // tslint:disable-next-line: no-empty
-            () => {}, // Mongoose won't delete without a return function
-          );
+            () => {} // Mongoose won't delete without a return function
+          )
         }),
           WorkoutExercise.deleteMany(
             {workoutId: args.id},
             // tslint:disable-next-line: no-empty
-            () => {}, // Mongoose won't delete without a return function
-          );
-      });
-      return Workout.findByIdAndDelete(args.id);
+            () => {} // Mongoose won't delete without a return function
+          )
+      })
+      return Workout.findByIdAndDelete(args.id)
     },
     updateWorkout: (_parent, args) => {
-      const {id, startTime, endTime} = args.workout;
-      return Workout.findByIdAndUpdate(
-        {_id: id},
-        filterOutFalsies({startTime, endTime}),
-        {new: true},
-      );
+      const {id, startTime, endTime} = args.workout
+      return Workout.findByIdAndUpdate({_id: id}, filterOutFalsies({startTime, endTime}), {new: true})
+    },
+    stopWorkout: (_parent, args) => {
+      return Workout.findByIdAndUpdate({_id: args.id}, {endTime: new Date()}, {new: true})
     },
     // WORKOUT_EXERCISE
     addWorkoutExercise: (_parent, args) => {
       const workoutExercise = new WorkoutExercise({
-        ...args.workoutExercise,
-      });
-      return workoutExercise.save();
+        ...args.workoutExercise
+      })
+      return workoutExercise.save()
     },
     removeWorkoutExercise: (_parent, args) => {
       WorkoutSet.deleteMany(
         {workoutExerciseId: args.id},
         // tslint:disable-next-line: no-empty
-        () => {}, // Mongoose won't delete without a return function
-      );
-      return WorkoutExercise.findByIdAndDelete(args.id);
+        () => {} // Mongoose won't delete without a return function
+      )
+      return WorkoutExercise.findByIdAndDelete(args.id)
     },
     updateWorkoutExercise: (_parent, args) => {
-      const {id, name, desc, workoutId} = args.workoutExercise;
-      return WorkoutExercise.findByIdAndUpdate(
-        {_id: id},
-        filterOutFalsies({name, desc, workoutId}),
-        {new: true},
-      );
+      const {id, name, desc, workoutId} = args.workoutExercise
+      return WorkoutExercise.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc, workoutId}), {new: true})
     },
     // WORKOUT_SET
     addWorkoutSet: (_parent, args) => {
       const workoutSet = new WorkoutSet({
-        ...args.workoutSet,
-      });
-      return workoutSet.save();
+        ...args.workoutSet
+      })
+      return workoutSet.save()
     },
     removeWorkoutSet: (_parent, args) => WorkoutSet.findByIdAndDelete(args.id),
     updateWorkoutSet: (_parent, args) => {
-      const {id, weight, repetitions, workoutExerciseId} = args.workoutSet;
-      return WorkoutSet.findByIdAndUpdate(
-        {_id: id},
-        filterOutFalsies({weight, repetitions, workoutExerciseId}),
-        {new: true},
-      );
-    },
+      const {id, weight, repetitions, workoutExerciseId} = args.workoutSet
+      return WorkoutSet.findByIdAndUpdate({_id: id}, filterOutFalsies({weight, repetitions, workoutExerciseId}), {
+        new: true
+      })
+    }
   },
   Category: {exercises: (parent) => Exercise.find({categoryId: parent.id})},
   Exercise: {category: (parent) => Category.findById(parent.categoryId)},
   Workout: {
-    workoutExercises: (parent) => WorkoutExercise.find({workoutId: parent.id}),
+    workoutExercises: (parent) => WorkoutExercise.find({workoutId: parent.id})
   },
   WorkoutExercise: {
     workout: (parent) => Workout.findById(parent.workoutId),
-    workoutSets: (parent) => WorkoutSet.find({workoutExerciseId: parent.id}),
+    workoutSets: (parent) => WorkoutSet.find({workoutExerciseId: parent.id})
   },
   WorkoutSet: {
-    workoutExercise: (parent) =>
-      WorkoutExercise.findById(parent.workoutExerciseId),
-  },
-};
+    workoutExercise: (parent) => WorkoutExercise.findById(parent.workoutExerciseId)
+  }
+}

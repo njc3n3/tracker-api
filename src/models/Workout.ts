@@ -1,8 +1,8 @@
 import mongoose, {Schema} from 'mongoose'
 
 const workoutSchema = new Schema({
-  startTime: String,
-  endTime: String
+  startTime: Date,
+  endTime: Date
 })
 
 const Workout = mongoose.model('Workout', workoutSchema)
