@@ -1,8 +1,7 @@
 import mongoose, {Schema} from 'mongoose'
 
 const workoutExerciseSchema = new Schema({
-  name: String,
-  desc: String,
+  exerciseId: String,
   workoutId: String
 })
 

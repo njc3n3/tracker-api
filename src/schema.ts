@@ -64,22 +64,18 @@ export const typeDefs = gql`
   ### WORKOUT_EXERCISE ###
   type WorkoutExercise {
     id: ID
-    name: String
-    desc: String
+    exercise: Exercise
     workout: Workout
     workoutSets: [WorkoutSet]
   }
 
   input CreateWorkoutExerciseInput { # Switched naming pattern to prevent Apollo errors
-    name: String!
-    desc: String
+    exerciseId: ID!
     workoutId: ID!
   }
 
   input UpdateWorkoutExerciseInput { # Switched naming pattern to prevent Apollo errors
-    id: ID!
-    name: String
-    desc: String
+    exerciseId: ID
     workoutId: ID
   }
 
@@ -246,8 +242,8 @@ export const resolvers: IResolvers<any, any> = {
       return WorkoutExercise.findByIdAndDelete(args.id)
     },
     updateWorkoutExercise: (_parent, args) => {
-      const {id, name, desc, workoutId} = args.workoutExercise
-      return WorkoutExercise.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc, workoutId}), {new: true})
+      const {id, exerciseId, workoutId} = args.workoutExercise
+      return WorkoutExercise.findByIdAndUpdate({_id: id}, filterOutFalsies({exerciseId, workoutId}), {new: true})
     },
     // WORKOUT_SET
     addWorkoutSet: (_parent, args) => {
@@ -270,6 +266,7 @@ export const resolvers: IResolvers<any, any> = {
     workoutExercises: (parent) => WorkoutExercise.find({workoutId: parent.id})
   },
   WorkoutExercise: {
+    exercise: (parent) => Exercise.findById(parent.exerciseId),
     workout: (parent) => Workout.findById(parent.workoutId),
     workoutSets: (parent) => WorkoutSet.find({workoutExerciseId: parent.id})
   },
