@@ -1,4 +1,5 @@
 import {gql, IResolvers} from 'apollo-server'
+import Routine from './models/Routine'
 import Category from './models/Category'
 import Exercise from './models/Exercise'
 import Workout from './models/Workout'
@@ -7,6 +8,27 @@ import WorkoutSet from './models/WorkoutSet'
 import {filterOutFalsies} from './utils'
 
 export const typeDefs = gql`
+  ### ROUTINE ###
+  type Routine {
+    id: ID
+    name: String
+    notes: String
+    exercises: [Exercise]
+  }
+
+  input RoutineCreateInput {
+    name: String!
+    notes: String
+    exerciseIds: [ID]
+  }
+
+  input RoutineUpdateInput {
+    id: ID!
+    name: String
+    notes: String
+    exerciseIds: [ID]
+  }
+
   ### CATEGORY ###
   type Category {
     id: ID
@@ -84,12 +106,14 @@ export const typeDefs = gql`
     id: ID
     weight: Float
     repetitions: Int
+    isBodyWeight: Boolean
     workoutExercise: WorkoutExercise
   }
 
   input WorkoutSetCreateInput {
     weight: Float
     repetitions: Int
+    isBodyWeight: Boolean
     workoutExerciseId: ID!
   }
 
@@ -102,6 +126,9 @@ export const typeDefs = gql`
 
   ### QUERY ###
   type Query {
+    # ROUTINE
+    routine(id: ID!): Routine
+    routines: [Routine]
     # CATEGORY
     category(id: ID!): Category
     categories: [Category]
@@ -121,6 +148,10 @@ export const typeDefs = gql`
 
   ### MUTATION ###
   type Mutation {
+    # ROUTINE
+    addRoutine(routine: RoutineCreateInput!): Routine
+    removeRoutine(id: ID!): Routine
+    updateRoutine(routine: RoutineUpdateInput!): Routine
     # CATEGORY
     addCategory(category: CategoryCreateInput!): Category
     removeCategory(id: ID!): Category
@@ -147,6 +178,9 @@ export const typeDefs = gql`
 
 export const resolvers: IResolvers<any, any> = {
   Query: {
+    // ROUTINE
+    routine: (_parent, args) => Routine.findById(args.id),
+    routines: () => Routine.find(),
     // CATEGORY
     category: (_parent, args) => Category.findById(args.id),
     categories: () => Category.find(),
@@ -164,6 +198,20 @@ export const resolvers: IResolvers<any, any> = {
     workoutSets: (_parent, args) => WorkoutSet.find({workoutExerciseId: args.workoutExerciseId})
   },
   Mutation: {
+    // ROUTINE
+    addRoutine: (_parent, args) => {
+      const routine = new Routine({
+        ...args.routine
+      })
+      return routine.save()
+    },
+    removeRoutine: (_parent, args) => {
+      return Routine.findByIdAndDelete(args.id)
+    },
+    updateRoutine: (_parent, args) => {
+      const {id, name, notes, exerciseIds} = args.routine
+      return Routine.findByIdAndUpdate({_id: id}, filterOutFalsies({name, notes, exerciseIds}), {new: true})
+    },
     // CATEGORY
     addCategory: (_parent, args) => {
       const category = new Category({
@@ -260,6 +308,7 @@ export const resolvers: IResolvers<any, any> = {
       })
     }
   },
+  Routine: {exercises: (parent) => parent?.exerciseIds?.map((exerciseId: string) => Exercise.findById(exerciseId))},
   Category: {exercises: (parent) => Exercise.find({categoryId: parent.id})},
   Exercise: {category: (parent) => Category.findById(parent.categoryId)},
   Workout: {
