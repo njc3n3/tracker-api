@@ -5,6 +5,4 @@ const workoutSchema = new Schema({
   endTime: Date
 })
 
-const Workout = mongoose.model('Workout', workoutSchema)
-
-export default Workout
+export const Workout = mongoose.model('Workout', workoutSchema)

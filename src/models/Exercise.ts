@@ -6,6 +6,4 @@ const exerciseSchema = new Schema({
   categoryId: String
 })
 
-const Exercise = mongoose.model('Exercise', exerciseSchema)
-
-export default Exercise
+export const Exercise = mongoose.model('Exercise', exerciseSchema)

@@ -3,9 +3,8 @@ import mongoose, {Schema} from 'mongoose'
 const workoutSetSchema = new Schema({
   weight: Number,
   repetitions: Number,
-  workoutExerciseId: String
+  workoutExerciseId: String,
+  routineFolderId: String
 })
 
-const WorkoutSet = mongoose.model('WorkoutSet', workoutSetSchema)
-
-export default WorkoutSet
+export const WorkoutSet = mongoose.model('WorkoutSet', workoutSetSchema)

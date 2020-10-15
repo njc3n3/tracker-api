@@ -1,24 +1,37 @@
 import {gql, IResolvers} from 'apollo-server'
-import Routine from './models/Routine'
-import Category from './models/Category'
-import Exercise from './models/Exercise'
-import Workout from './models/Workout'
-import WorkoutExercise from './models/WorkoutExercise'
-import WorkoutSet from './models/WorkoutSet'
+import {Category, Exercise, Routine, RoutineFolder, Workout, WorkoutExercise, WorkoutSet} from './models'
 import {filterOutFalsies} from './utils'
 
 export const typeDefs = gql`
+  ### ROUTINE_FOLDER ###
+  type RoutineFolder {
+    id: ID
+    name: String
+    routines: [Routine]
+  }
+
+  input RoutineFolderCreateInput {
+    name: String!
+  }
+
+  input RoutineFolderUpdateInput {
+    id: ID!
+    name: String
+  }
+
   ### ROUTINE ###
   type Routine {
     id: ID
     name: String
     notes: String
+    routineFolder: RoutineFolder
     exercises: [Exercise]
   }
 
   input RoutineCreateInput {
     name: String!
     notes: String
+    routineFolderId: ID
     exerciseIds: [ID]
   }
 
@@ -26,6 +39,7 @@ export const typeDefs = gql`
     id: ID!
     name: String
     notes: String
+    routineFolderId: ID
     exerciseIds: [ID]
   }
 
@@ -126,9 +140,12 @@ export const typeDefs = gql`
 
   ### QUERY ###
   type Query {
+    # ROUTINE_FOLDER
+    routineFolder(id: ID!): RoutineFolder
+    routineFolders: [RoutineFolder]
     # ROUTINE
     routine(id: ID!): Routine
-    routines: [Routine]
+    routines(routineFolderId: ID): [Routine]
     # CATEGORY
     category(id: ID!): Category
     categories: [Category]
@@ -148,6 +165,10 @@ export const typeDefs = gql`
 
   ### MUTATION ###
   type Mutation {
+    # ROUTINE_FOLDER
+    addRoutineFolder(routineFolder: RoutineFolderCreateInput!): RoutineFolder
+    removeRoutineFolder(id: ID!): RoutineFolder
+    updateRoutineFolder(routineFolder: RoutineFolderUpdateInput!): RoutineFolder
     # ROUTINE
     addRoutine(routine: RoutineCreateInput!): Routine
     removeRoutine(id: ID!): Routine
@@ -178,9 +199,12 @@ export const typeDefs = gql`
 
 export const resolvers: IResolvers<any, any> = {
   Query: {
+    // ROUTINE_FOLDER
+    routineFolder: (_parent, args) => RoutineFolder.findById(args.id),
+    routineFolders: () => RoutineFolder.find(),
     // ROUTINE
     routine: (_parent, args) => Routine.findById(args.id),
-    routines: () => Routine.find(),
+    routines: (_parent, args) => Routine.find(args.routineFolderId ? {routineFolderId: args.routineFolderId} : {}),
     // CATEGORY
     category: (_parent, args) => Category.findById(args.id),
     categories: () => Category.find(),
@@ -198,6 +222,21 @@ export const resolvers: IResolvers<any, any> = {
     workoutSets: (_parent, args) => WorkoutSet.find({workoutExerciseId: args.workoutExerciseId})
   },
   Mutation: {
+    // ROUTINE_FOLDER
+    addRoutineFolder: (_parent, args) => {
+      const routineFolder = new RoutineFolder({
+        ...args.routineFolder
+      })
+      return routineFolder.save()
+    },
+    removeRoutineFolder: (_parent, args) => {
+      // TODO: Remove routineFolderId field from all Routines in that folder
+      return RoutineFolder.findByIdAndDelete(args.id)
+    },
+    updateRoutineFolder: (_parent, args) => {
+      const {id, name} = args.routineFolder
+      return RoutineFolder.findByIdAndUpdate({_id: id}, filterOutFalsies({name}), {new: true})
+    },
     // ROUTINE
     addRoutine: (_parent, args) => {
       const routine = new Routine({
@@ -209,8 +248,10 @@ export const resolvers: IResolvers<any, any> = {
       return Routine.findByIdAndDelete(args.id)
     },
     updateRoutine: (_parent, args) => {
-      const {id, name, notes, exerciseIds} = args.routine
-      return Routine.findByIdAndUpdate({_id: id}, filterOutFalsies({name, notes, exerciseIds}), {new: true})
+      const {id, name, notes, routineFolderId, exerciseIds} = args.routine
+      return Routine.findByIdAndUpdate({_id: id}, filterOutFalsies({name, notes, routineFolderId, exerciseIds}), {
+        new: true
+      })
     },
     // CATEGORY
     addCategory: (_parent, args) => {
@@ -308,7 +349,11 @@ export const resolvers: IResolvers<any, any> = {
       })
     }
   },
-  Routine: {exercises: (parent) => parent?.exerciseIds?.map((exerciseId: string) => Exercise.findById(exerciseId))},
+  RoutineFolder: {routines: (parent) => Routine.find({routineFolderId: parent.id})},
+  Routine: {
+    routineFolder: (parent) => RoutineFolder.findById(parent.routineFolderId),
+    exercises: (parent) => parent?.exerciseIds?.map((exerciseId: string) => Exercise.findById(exerciseId))
+  },
   Category: {exercises: (parent) => Exercise.find({categoryId: parent.id})},
   Exercise: {category: (parent) => Category.findById(parent.categoryId)},
   Workout: {

@@ -3,7 +3,7 @@ import {ApolloServer} from 'apollo-server'
 import {typeDefs, resolvers} from './schema'
 
 mongoose.connect(
-  `mongodb+srv://nicholasjcoffey:${process.env.TRACKER_DB_PW}@cluster0.j0ien.mongodb.net/tracker?retryWrites=true&w=majority`,
+  `mongodb+srv://nicholasjcoffey:CbQA-4wMLfF!YweCZ7r@cluster0.j0ien.mongodb.net/tracker?retryWrites=true&w=majority`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

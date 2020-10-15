@@ -3,9 +3,8 @@ import mongoose, {Schema} from 'mongoose'
 const routineSchema = new Schema({
   name: String,
   notes: String,
+  routineFolderId: String,
   exerciseIds: [String]
 })
 
-const Routine = mongoose.model('Routine', routineSchema)
-
-export default Routine
+export const Routine = mongoose.model('Routine', routineSchema)
