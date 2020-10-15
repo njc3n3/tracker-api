@@ -4,6 +4,7 @@ import {filterOutFalsies} from './utils'
 
 export const typeDefs = gql`
   ### ROUTINE_FOLDER ###
+  "Organizes Routines"
   type RoutineFolder {
     id: ID
     name: String
@@ -20,6 +21,7 @@ export const typeDefs = gql`
   }
 
   ### ROUTINE ###
+  "Acts as scaffolding for creating Workouts"
   type Routine {
     id: ID
     name: String
@@ -44,6 +46,7 @@ export const typeDefs = gql`
   }
 
   ### CATEGORY ###
+  "Organizes Exercises for reference"
   type Category {
     id: ID
     name: String
@@ -63,6 +66,7 @@ export const typeDefs = gql`
   }
 
   ### EXERCISE ###
+  "Exercise related data for reference in other objects"
   type Exercise {
     id: ID
     name: String
@@ -84,6 +88,7 @@ export const typeDefs = gql`
   }
 
   ### WORKOUT ###
+  "Contains a collection of WorkoutExercises as well as time data for workout length calculation"
   type Workout {
     id: ID
     startTime: String
@@ -98,6 +103,7 @@ export const typeDefs = gql`
   }
 
   ### WORKOUT_EXERCISE ###
+  "A Workout specific exercise object used for tracking WorkoutSets"
   type WorkoutExercise {
     id: ID
     exercise: Exercise
@@ -116,18 +122,17 @@ export const typeDefs = gql`
   }
 
   ### WORKOUT_SET ###
+  "Used to track weight, repetitions, time"
   type WorkoutSet {
     id: ID
     weight: Float
     repetitions: Int
-    isBodyWeight: Boolean
     workoutExercise: WorkoutExercise
   }
 
   input WorkoutSetCreateInput {
     weight: Float
     repetitions: Int
-    isBodyWeight: Boolean
     workoutExerciseId: ID!
   }
 

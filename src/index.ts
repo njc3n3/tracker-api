@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import {ApolloServer} from 'apollo-server'
 import {typeDefs, resolvers} from './schema'
 
+// TODO: Change db password
 mongoose.connect(
   `mongodb+srv://nicholasjcoffey:CbQA-4wMLfF!YweCZ7r@cluster0.j0ien.mongodb.net/tracker?retryWrites=true&w=majority`,
   {
