@@ -1,5 +1,5 @@
 import {gql, IResolvers} from 'apollo-server'
-import {Category, Exercise, Routine, RoutineFolder, Workout, WorkoutExercise, WorkoutSet} from './models'
+import {BodyPart, Exercise, Routine, RoutineFolder, Workout, WorkoutExercise, WorkoutSet} from './models'
 import {filterOutFalsies} from './utils'
 
 export const typeDefs = gql`
@@ -45,24 +45,21 @@ export const typeDefs = gql`
     exerciseIds: [ID]
   }
 
-  ### CATEGORY ###
+  ### BODY_PART ###
   "Organizes Exercises for reference"
-  type Category {
+  type BodyPart {
     id: ID
     name: String
-    desc: String
     exercises: [Exercise]
   }
 
-  input CategoryCreateInput {
+  input BodyPartCreateInput {
     name: String!
-    desc: String
   }
 
-  input CategoryUpdateInput {
+  input BodyPartUpdateInput {
     id: ID!
     name: String
-    desc: String
   }
 
   ### EXERCISE ###
@@ -71,20 +68,20 @@ export const typeDefs = gql`
     id: ID
     name: String
     desc: String
-    category: Category
+    bodyPart: BodyPart
   }
 
   input ExerciseCreateInput {
     name: String!
     desc: String
-    categoryId: ID!
+    bodyPartId: ID!
   }
 
   input ExerciseUpdateInput {
     id: ID!
     name: String
     desc: String
-    categoryId: ID
+    bodyPartId: ID
   }
 
   ### WORKOUT ###
@@ -151,12 +148,12 @@ export const typeDefs = gql`
     # ROUTINE
     routine(id: ID!): Routine
     routines(routineFolderId: ID): [Routine]
-    # CATEGORY
-    category(id: ID!): Category
-    categories: [Category]
+    # BODY_PART
+    bodyPart(id: ID!): BodyPart
+    bodyParts: [BodyPart]
     # EXERCISE
     exercise(id: ID!): Exercise
-    exercises(categoryId: ID!): [Exercise]
+    exercises(bodyPartId: ID!): [Exercise]
     # WORKOUT
     workout(id: ID!): Workout
     workouts: [Workout]
@@ -178,10 +175,10 @@ export const typeDefs = gql`
     addRoutine(routine: RoutineCreateInput!): Routine
     removeRoutine(id: ID!): Routine
     updateRoutine(routine: RoutineUpdateInput!): Routine
-    # CATEGORY
-    addCategory(category: CategoryCreateInput!): Category
-    removeCategory(id: ID!): Category
-    updateCategory(category: CategoryUpdateInput!): Category
+    # BODY_PART
+    addBodyPart(bodyPart: BodyPartCreateInput!): BodyPart
+    removeBodyPart(id: ID!): BodyPart
+    updateBodyPart(bodyPart: BodyPartUpdateInput!): BodyPart
     # EXERCISE
     addExercise(exercise: ExerciseCreateInput!): Exercise
     removeExercise(id: ID!): Exercise
@@ -210,12 +207,12 @@ export const resolvers: IResolvers<any, any> = {
     // ROUTINE
     routine: (_parent, args) => Routine.findById(args.id),
     routines: (_parent, args) => Routine.find(args.routineFolderId ? {routineFolderId: args.routineFolderId} : {}),
-    // CATEGORY
-    category: (_parent, args) => Category.findById(args.id),
-    categories: () => Category.find(),
+    // BODY_PART
+    bodyPart: (_parent, args) => BodyPart.findById(args.id),
+    bodyParts: () => BodyPart.find(),
     // EXERCISE
     exercise: (_parent, args) => Exercise.findById(args.id),
-    exercises: (_parent, args) => Exercise.find({categoryId: args.categoryId}),
+    exercises: (_parent, args) => Exercise.find({bodyPartId: args.bodyPartId}),
     // WORKOUT
     workout: (_parent, args) => Workout.findById(args.id),
     workouts: () => Workout.find(),
@@ -258,24 +255,24 @@ export const resolvers: IResolvers<any, any> = {
         new: true
       })
     },
-    // CATEGORY
-    addCategory: (_parent, args) => {
-      const category = new Category({
-        ...args.category
+    // BODY_PART
+    addBodyPart: (_parent, args) => {
+      const bodyPart = new BodyPart({
+        ...args.bodyPart
       })
-      return category.save()
+      return bodyPart.save()
     },
-    removeCategory: (_parent, args) => {
+    removeBodyPart: (_parent, args) => {
       Exercise.deleteMany(
-        {categoryId: args.id},
+        {bodyPartId: args.id},
         // tslint:disable-next-line: no-empty
         () => {} // Mongoose won't delete without a return function
       )
-      return Category.findByIdAndDelete(args.id)
+      return BodyPart.findByIdAndDelete(args.id)
     },
-    updateCategory: (_parent, args) => {
-      const {id, name, desc} = args.category
-      return Category.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc}), {new: true})
+    updateBodyPart: (_parent, args) => {
+      const {id, name} = args.bodyPart
+      return BodyPart.findByIdAndUpdate({_id: id}, filterOutFalsies({name}), {new: true})
     },
     // EXERCISE
     addExercise: (_parent, args) => {
@@ -286,8 +283,8 @@ export const resolvers: IResolvers<any, any> = {
     },
     removeExercise: (_parent, args) => Exercise.findByIdAndDelete(args.id),
     updateExercise: (_parent, args) => {
-      const {id, name, desc, categoryId} = args.exercise
-      return Exercise.findByIdAndUpdate({_id: id}, filterOutFalsies({name, desc, categoryId}), {new: true})
+      const {id, name, bodyPartId} = args.exercise
+      return Exercise.findByIdAndUpdate({_id: id}, filterOutFalsies({name, bodyPartId}), {new: true})
     },
     // WORKOUT
     addWorkout: () => {
@@ -359,8 +356,8 @@ export const resolvers: IResolvers<any, any> = {
     routineFolder: (parent) => RoutineFolder.findById(parent.routineFolderId),
     exercises: (parent) => parent?.exerciseIds?.map((exerciseId: string) => Exercise.findById(exerciseId))
   },
-  Category: {exercises: (parent) => Exercise.find({categoryId: parent.id})},
-  Exercise: {category: (parent) => Category.findById(parent.categoryId)},
+  BodyPart: {exercises: (parent) => Exercise.find({bodyPartId: parent.id})},
+  Exercise: {bodyPart: (parent) => BodyPart.findById(parent.bodyPartId)},
   Workout: {
     workoutExercises: (parent) => WorkoutExercise.find({workoutId: parent.id})
   },

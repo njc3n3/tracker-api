@@ -1,4 +1,4 @@
-export * from './Category'
+export * from './BodyPart'
 export * from './Exercise'
 export * from './Routine'
 export * from './RoutineFolder'
