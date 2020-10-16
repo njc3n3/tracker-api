@@ -2,7 +2,7 @@ import {gql, IResolvers} from 'apollo-server'
 import {merge} from 'lodash'
 import {trackerTypeDefs, trackerResolvers} from './gql'
 
-export const baseTypeDefs = gql`
+const baseTypeDefs = gql`
   type Query
   type Mutation
 `

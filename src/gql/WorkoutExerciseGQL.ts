@@ -1,6 +1,7 @@
 import {gql, IResolvers} from 'apollo-server'
-import {WorkoutExercise, WorkoutSet, Exercise, Workout} from '../models'
+import {WorkoutExercise, Exercise, Workout} from '../models'
 import {filterOutFalsies} from '../utils'
+import {deleteAllWorkoutSets, findAllWorkoutSets} from './WorkoutSetGQL'
 
 export const workoutExerciseTypeDefs = gql`
   "A Workout specific exercise object used for tracking WorkoutSets"
@@ -46,11 +47,7 @@ export const workoutExerciseResolvers: IResolvers<any, any> = {
       return workoutExercise.save()
     },
     removeWorkoutExercise: (_parent, args) => {
-      WorkoutSet.deleteMany(
-        {workoutExerciseId: args.id},
-        // tslint:disable-next-line: no-empty
-        () => {} // Mongoose won't delete without a return function
-      )
+      deleteAllWorkoutSets(args.id)
       return WorkoutExercise.findByIdAndDelete(args.id)
     },
     updateWorkoutExercise: (_parent, args) => {
@@ -61,6 +58,6 @@ export const workoutExerciseResolvers: IResolvers<any, any> = {
   WorkoutExercise: {
     exercise: (parent) => Exercise.findById(parent.exerciseId),
     workout: (parent) => Workout.findById(parent.workoutId),
-    workoutSets: (parent) => WorkoutSet.find({workoutExerciseId: parent.id})
+    workoutSets: (parent) => findAllWorkoutSets(parent.id)
   }
 }

@@ -1,27 +1,12 @@
 import {gql, IResolvers} from 'apollo-server'
-import {WorkoutSet, WorkoutExercise} from '../models'
-import {filterOutFalsies} from '../utils'
+import {WeightedWorkoutSet} from '../models'
+import {addWeightedWorkoutSet, updateWeightedWorkoutSet} from './WeightedWorkoutSetGQL'
 
 export const workoutSetTypeDefs = gql`
-  "Used to track weight, repetitions, time"
-  type WorkoutSet {
+  "Base fields for set types"
+  interface WorkoutSet {
     id: ID
-    weight: Float
-    repetitions: Int
     workoutExercise: WorkoutExercise
-  }
-
-  input WorkoutSetCreateInput {
-    weight: Float
-    repetitions: Int
-    workoutExerciseId: ID!
-  }
-
-  input WorkoutSetUpdateInput {
-    id: ID!
-    weight: Float
-    repetitions: Int
-    workoutExerciseId: ID
   }
 
   extend type Query {
@@ -30,33 +15,67 @@ export const workoutSetTypeDefs = gql`
   }
 
   extend type Mutation {
-    addWorkoutSet(workoutSet: WorkoutSetCreateInput!): WorkoutSet
+    "Only use one of these inputs at a time"
+    addWorkoutSet(weightedWorkoutSet: WeightedWorkoutSetCreateInput): WorkoutSet
     removeWorkoutSet(id: ID!): WorkoutSet
-    updateWorkoutSet(workoutSet: WorkoutSetUpdateInput!): WorkoutSet
+    updateWorkoutSet(weightedWorkoutSet: WeightedWorkoutSetUpdateInput): WorkoutSet
   }
 `
 
 export const workoutSetResolvers: IResolvers<any, any> = {
   Query: {
-    workoutSet: (_parent, args) => WorkoutSet.findById(args.id),
-    workoutSets: (_parent, args) => WorkoutSet.find({workoutExerciseId: args.workoutExerciseId})
+    workoutSet: (_parent, args) => findWorkoutSet(args.id),
+    workoutSets: (_parent, args) => findAllWorkoutSets(args.workoutExerciseId)
   },
   Mutation: {
-    addWorkoutSet: (_parent, args) => {
-      const workoutSet = new WorkoutSet({
-        ...args.workoutSet
-      })
-      return workoutSet.save()
-    },
-    removeWorkoutSet: (_parent, args) => WorkoutSet.findByIdAndDelete(args.id),
-    updateWorkoutSet: (_parent, args) => {
-      const {id, weight, repetitions, workoutExerciseId} = args.workoutSet
-      return WorkoutSet.findByIdAndUpdate({_id: id}, filterOutFalsies({weight, repetitions, workoutExerciseId}), {
-        new: true
-      })
-    }
+    addWorkoutSet: (_parent, args) => addWorkoutSet(args),
+    removeWorkoutSet: (_parent, args) => deleteWorkoutSet(args.id),
+    updateWorkoutSet: (_parent, args) => updateWorkoutSet(args)
   },
   WorkoutSet: {
-    workoutExercise: (parent) => WorkoutExercise.findById(parent.workoutExerciseId)
+    __resolveType(workoutSet: any) {
+      let set = null
+      if (workoutSet.weight !== undefined) {
+        set = 'WeightedWorkoutSet'
+      }
+
+      return set
+    }
   }
+}
+
+const addWorkoutSet = (args: any) => {
+  let workoutSet = null
+  if (args.weightedWorkoutSet) {
+    workoutSet = addWeightedWorkoutSet(args.weightedWorkoutSet)
+  }
+  return workoutSet
+}
+
+const findWorkoutSet = (workoutSetId: string) => {
+  return WeightedWorkoutSet.findById(workoutSetId)
+}
+
+export const findAllWorkoutSets = (workoutExerciseId?: string) => {
+  return WeightedWorkoutSet.find(workoutExerciseId ? {workoutExerciseId} : {})
+}
+
+const updateWorkoutSet = (args: any) => {
+  let workoutSet = null
+  if (args.weightedWorkoutSet) {
+    workoutSet = updateWeightedWorkoutSet(args.weightedWorkoutSet)
+  }
+  return workoutSet
+}
+
+const deleteWorkoutSet = (workoutSetId: string) => {
+  return WeightedWorkoutSet.findByIdAndDelete(workoutSetId)
+}
+
+export const deleteAllWorkoutSets = (workoutExerciseId: string) => {
+  return WeightedWorkoutSet.deleteMany(
+    {workoutExerciseId},
+    // tslint:disable-next-line: no-empty
+    () => {} // Mongoose won't delete without a return function
+  )
 }

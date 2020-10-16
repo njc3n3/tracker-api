@@ -1,6 +1,7 @@
 import {gql, IResolvers} from 'apollo-server'
-import {Workout, WorkoutExercise, WorkoutSet} from '../models'
+import {Workout, WorkoutExercise} from '../models'
 import {filterOutFalsies} from '../utils'
+import {deleteAllWorkoutSets} from './WorkoutSetGQL'
 
 export const workoutTypeDefs = gql`
   "Contains a collection of WorkoutExercises as well as time data for workout length calculation"
@@ -45,11 +46,7 @@ export const workoutResolvers: IResolvers<any, any> = {
     removeWorkout: (_parent, args) => {
       WorkoutExercise.find({workoutId: args.id}).then((workoutExercises) => {
         workoutExercises.forEach((workoutExercise) => {
-          WorkoutSet.deleteMany(
-            {workoutExerciseId: workoutExercise.id},
-            // tslint:disable-next-line: no-empty
-            () => {} // Mongoose won't delete without a return function
-          )
+          deleteAllWorkoutSets(workoutExercise.id)
         }),
           WorkoutExercise.deleteMany(
             {workoutId: args.id},
