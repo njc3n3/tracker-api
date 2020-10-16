@@ -1,4 +1,5 @@
 export * from './BodyPart'
+export * from './BodyweightWorkoutSet'
 export * from './Exercise'
 export * from './Routine'
 export * from './RoutineFolder'

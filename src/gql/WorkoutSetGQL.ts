@@ -1,5 +1,6 @@
 import {gql, IResolvers} from 'apollo-server'
-import {WeightedWorkoutSet} from '../models'
+import {BodyweightWorkoutSet, WeightedWorkoutSet} from '../models'
+import {addBodyweightWorkoutSet, updateBodyweightWorkoutSet} from './BodyweightWorkoutSetGQL'
 import {addWeightedWorkoutSet, updateWeightedWorkoutSet} from './WeightedWorkoutSetGQL'
 
 export const workoutSetTypeDefs = gql`
@@ -16,9 +17,15 @@ export const workoutSetTypeDefs = gql`
 
   extend type Mutation {
     "Only use one of these inputs at a time"
-    addWorkoutSet(weightedWorkoutSet: WeightedWorkoutSetCreateInput): WorkoutSet
+    addWorkoutSet(
+      weightedWorkoutSet: WeightedWorkoutSetCreateInput
+      bodyweightWorkoutSet: BodyweightWorkoutSetCreateInput
+    ): WorkoutSet
     removeWorkoutSet(id: ID!): WorkoutSet
-    updateWorkoutSet(weightedWorkoutSet: WeightedWorkoutSetUpdateInput): WorkoutSet
+    updateWorkoutSet(
+      weightedWorkoutSet: WeightedWorkoutSetUpdateInput
+      bodyweightWorkoutSet: BodyweightWorkoutSetUpdateInput
+    ): WorkoutSet
   }
 `
 
@@ -35,8 +42,10 @@ export const workoutSetResolvers: IResolvers<any, any> = {
   WorkoutSet: {
     __resolveType(workoutSet: any) {
       let set = null
-      if (workoutSet.weight !== undefined) {
+      if (workoutSet.weight !== undefined && workoutSet.weight !== undefined) {
         set = 'WeightedWorkoutSet'
+      } else if (workoutSet.repetitions !== undefined) {
+        set = 'BodyweightWorkoutSet'
       }
 
       return set
@@ -48,34 +57,58 @@ const addWorkoutSet = (args: any) => {
   let workoutSet = null
   if (args.weightedWorkoutSet) {
     workoutSet = addWeightedWorkoutSet(args.weightedWorkoutSet)
+  } else if (args.bodyweightWorkoutSet) {
+    workoutSet = addBodyweightWorkoutSet(args.bodyweightWorkoutSet)
   }
   return workoutSet
 }
 
-const findWorkoutSet = (workoutSetId: string) => {
-  return WeightedWorkoutSet.findById(workoutSetId)
+const findWorkoutSet = async (workoutSetId: string) => {
+  const weighted = await WeightedWorkoutSet.findById(workoutSetId)
+  if (weighted) return weighted
+  const bodyweight = await BodyweightWorkoutSet.findById(workoutSetId)
+  if (bodyweight) return bodyweight
+  return null
 }
 
-export const findAllWorkoutSets = (workoutExerciseId?: string) => {
-  return WeightedWorkoutSet.find(workoutExerciseId ? {workoutExerciseId} : {})
+export const findAllWorkoutSets = async (workoutExerciseId?: string) => {
+  const workoutSets = [
+    ...(await WeightedWorkoutSet.find(workoutExerciseId ? {workoutExerciseId} : {})),
+    ...(await BodyweightWorkoutSet.find(workoutExerciseId ? {workoutExerciseId} : {}))
+  ]
+  return workoutSets.length > 0 ? workoutSets : null
 }
 
 const updateWorkoutSet = (args: any) => {
   let workoutSet = null
   if (args.weightedWorkoutSet) {
     workoutSet = updateWeightedWorkoutSet(args.weightedWorkoutSet)
+  } else if (args.bodyweightWorkoutSet) {
+    workoutSet = updateBodyweightWorkoutSet(args.bodyweightWorkoutSet)
   }
   return workoutSet
 }
 
-const deleteWorkoutSet = (workoutSetId: string) => {
-  return WeightedWorkoutSet.findByIdAndDelete(workoutSetId)
+const deleteWorkoutSet = async (workoutSetId: string) => {
+  const weighted = await WeightedWorkoutSet.findByIdAndDelete(workoutSetId)
+  if (weighted) return weighted
+  const bodyweight = await BodyweightWorkoutSet.findByIdAndDelete(workoutSetId)
+  if (bodyweight) return bodyweight
+  return null
 }
 
 export const deleteAllWorkoutSets = (workoutExerciseId: string) => {
-  return WeightedWorkoutSet.deleteMany(
-    {workoutExerciseId},
-    // tslint:disable-next-line: no-empty
-    () => {} // Mongoose won't delete without a return function
-  )
+  // TODO: make a better way to handle returns
+  return {
+    ...WeightedWorkoutSet.deleteMany(
+      {workoutExerciseId},
+      // tslint:disable-next-line: no-empty
+      () => {} // Mongoose won't delete without a return function
+    ),
+    ...BodyweightWorkoutSet.deleteMany(
+      {workoutExerciseId},
+      // tslint:disable-next-line: no-empty
+      () => {} // Mongoose won't delete without a return function
+    )
+  }
 }
