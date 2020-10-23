@@ -1,13 +1,26 @@
 import {gql} from 'apollo-server'
 import {BodyPartResolvers, Resolvers} from '../generated/graphql'
-import {BodyPart, Exercise} from '../models'
-import {filterOutFalsies} from '../utils'
+import {
+  IBodyPart,
+  IBodyPartCreate,
+  IBodyPartUpdate,
+  BodyPart,
+  Exercise,
+  findOneById,
+  addOne,
+  findAll,
+  updateOneById,
+  deleteOneById,
+  deleteMany,
+  IExercise,
+  IExerciseWhere
+} from '../models'
 
 export const bodyPartTypeDefs = gql`
   "Organizes Exercises for reference"
   type BodyPart {
-    id: ID
-    name: String
+    id: ID!
+    name: String!
     exercises: [Exercise]
   }
 
@@ -17,7 +30,7 @@ export const bodyPartTypeDefs = gql`
 
   input BodyPartUpdateInput {
     id: ID!
-    name: String
+    name: String!
   }
 
   extend type Query {
@@ -34,27 +47,17 @@ export const bodyPartTypeDefs = gql`
 
 export const bodyPartResolvers: Resolvers<BodyPartResolvers> = {
   Query: {
-    bodyPart: (_parent, args) => BodyPart.findById(args.id).exec(),
-    bodyParts: () => BodyPart.find().exec()
+    bodyPart: (_parent, args) => findOneById(BodyPart, args.id),
+    bodyParts: () => findAll(BodyPart)
   },
   Mutation: {
-    addBodyPart: (_parent, args) => {
-      const bodyPart = new BodyPart({
-        ...args.bodyPart
-      })
-      return bodyPart.save()
-    },
+    addBodyPart: (_parent, args) => addOne<IBodyPart, IBodyPartCreate>(BodyPart, args.bodyPart),
     removeBodyPart: (_parent, args) => {
-      Exercise.deleteMany(
-        {bodyPartId: args.id},
-        () => {} // Mongoose won't delete without a return function
-      )
-      return BodyPart.findByIdAndDelete(args.id).exec()
+      deleteMany<IExercise, IExerciseWhere>(Exercise, {bodyPartId: args.id})
+      return deleteOneById(BodyPart, args.id)
     },
-    updateBodyPart: (_parent, args) => {
-      const {id, name} = args.bodyPart
-      return BodyPart.findByIdAndUpdate({_id: id}, filterOutFalsies({name}), {new: true}).exec()
-    }
+    updateBodyPart: (_parent, args) => updateOneById<IBodyPart, IBodyPartUpdate>(BodyPart, args.bodyPart)
   },
-  BodyPart: {exercises: (parent) => Exercise.find({bodyPartId: parent.id}).exec()}
+  // @ts-ignore
+  BodyPart: {exercises: (parent) => findAll<IExercise, IExerciseWhere>(Exercise, {bodyPartId: parent.id})}
 }

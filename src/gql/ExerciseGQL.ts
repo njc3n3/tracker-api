@@ -5,11 +5,11 @@ import {filterOutFalsies} from '../utils'
 export const exerciseTypeDefs = gql`
   "Exercise related data for reference in other objects"
   type Exercise {
-    id: ID
-    name: String
+    id: ID!
+    name: String!
     desc: String
-    bodyPart: BodyPart
-    category: Category
+    bodyPart: BodyPart!
+    category: Category!
   }
 
   input ExerciseCreateInput {

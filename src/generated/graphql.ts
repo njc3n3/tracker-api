@@ -223,8 +223,8 @@ export type MutationUpdateWorkoutSetArgs = {
 /** Organizes Exercises for reference */
 export type BodyPart = {
   __typename?: 'BodyPart';
-  id?: Maybe<Scalars['ID']>;
-  name?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name: Scalars['String'];
   exercises?: Maybe<Array<Maybe<Exercise>>>;
 };
 
@@ -234,7 +234,7 @@ export type BodyPartCreateInput = {
 
 export type BodyPartUpdateInput = {
   id: Scalars['ID'];
-  name?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
 };
 
 /** Used to track only set repetitions */
@@ -259,11 +259,11 @@ export type BodyweightWorkoutSetUpdateInput = {
 /** Exercise related data for reference in other objects */
 export type Exercise = {
   __typename?: 'Exercise';
-  id?: Maybe<Scalars['ID']>;
-  name?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name: Scalars['String'];
   desc?: Maybe<Scalars['String']>;
-  bodyPart?: Maybe<BodyPart>;
-  category?: Maybe<Category>;
+  bodyPart: BodyPart;
+  category: Category;
 };
 
 export type ExerciseCreateInput = {
@@ -594,8 +594,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 }>;
 
 export type BodyPartResolvers<ContextType = any, ParentType extends ResolversParentTypes['BodyPart'] = ResolversParentTypes['BodyPart']> = ResolversObject<{
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   exercises?: Resolver<Maybe<Array<Maybe<ResolversTypes['Exercise']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -608,11 +608,11 @@ export type BodyweightWorkoutSetResolvers<ContextType = any, ParentType extends 
 }>;
 
 export type ExerciseResolvers<ContextType = any, ParentType extends ResolversParentTypes['Exercise'] = ResolversParentTypes['Exercise']> = ResolversObject<{
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   desc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  bodyPart?: Resolver<Maybe<ResolversTypes['BodyPart']>, ParentType, ContextType>;
-  category?: Resolver<Maybe<ResolversTypes['Category']>, ParentType, ContextType>;
+  bodyPart?: Resolver<ResolversTypes['BodyPart'], ParentType, ContextType>;
+  category?: Resolver<ResolversTypes['Category'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
