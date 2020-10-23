@@ -1,4 +1,5 @@
-import {gql, IResolvers} from 'apollo-server'
+import {gql} from 'apollo-server'
+import {BodyPartResolvers, Resolvers} from '../generated/graphql'
 import {BodyPart, Exercise} from '../models'
 import {filterOutFalsies} from '../utils'
 
@@ -31,10 +32,10 @@ export const bodyPartTypeDefs = gql`
   }
 `
 
-export const bodyPartResolvers: IResolvers<any, any> = {
+export const bodyPartResolvers: Resolvers<BodyPartResolvers> = {
   Query: {
-    bodyPart: (_parent, args) => BodyPart.findById(args.id),
-    bodyParts: () => BodyPart.find()
+    bodyPart: (_parent, args) => BodyPart.findById(args.id).exec(),
+    bodyParts: () => BodyPart.find().exec()
   },
   Mutation: {
     addBodyPart: (_parent, args) => {
@@ -46,15 +47,14 @@ export const bodyPartResolvers: IResolvers<any, any> = {
     removeBodyPart: (_parent, args) => {
       Exercise.deleteMany(
         {bodyPartId: args.id},
-        // tslint:disable-next-line: no-empty
         () => {} // Mongoose won't delete without a return function
       )
-      return BodyPart.findByIdAndDelete(args.id)
+      return BodyPart.findByIdAndDelete(args.id).exec()
     },
     updateBodyPart: (_parent, args) => {
       const {id, name} = args.bodyPart
-      return BodyPart.findByIdAndUpdate({_id: id}, filterOutFalsies({name}), {new: true})
+      return BodyPart.findByIdAndUpdate({_id: id}, filterOutFalsies({name}), {new: true}).exec()
     }
   },
-  BodyPart: {exercises: (parent) => Exercise.find({bodyPartId: parent.id})}
+  BodyPart: {exercises: (parent) => Exercise.find({bodyPartId: parent.id}).exec()}
 }
