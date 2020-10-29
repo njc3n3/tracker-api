@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:password@localhost:3306/tracker"
+}
+
+model RoutineFolder {
+  id                   Int       @id @default(autoincrement())
+  routineFolder_UserId Int
+  name                 String
+  user                 User      @relation(fields: [routineFolder_UserId], references: [id])
+  workouts             Workout[]
+
+  @@unique([id, routineFolder_UserId], name: "id")
+  @@index([routineFolder_UserId], name: "routineFolder_UserId")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String
+  name           String
+  password       String
+  exercises      Exercise[]
+  routineFolders RoutineFolder[]
+  workouts       Workout[]
+
+  @@unique([id, email], name: "id")
+}
+
+model Bodypart {
+  id        Int        @id @default(autoincrement())
+  name      String
+  exercises Exercise[]
+}
+
+model Exercise {
+  id                  Int               @id @default(autoincrement())
+  exercise_BodyPartId Int
+  exercise_UserId     Int?
+  name                String
+  description         String?
+  category            Exercise_category
+  bodypart            Bodypart          @relation(fields: [exercise_BodyPartId], references: [id])
+  user                User?             @relation(fields: [exercise_UserId], references: [id])
+  workoutExercises    WorkoutExercise[]
+
+  @@unique([id, exercise_BodyPartId, exercise_UserId], name: "id")
+  @@index([exercise_BodyPartId], name: "exercise_BodyPartId")
+  @@index([exercise_UserId], name: "exercise_UserId")
+}
+
+model Set {
+  id                    Int             @id @default(autoincrement())
+  set_WorkoutExerciseId Int
+  repetitions           Int?
+  weight                Int?
+  duration              Int?
+  workoutExercise       WorkoutExercise @relation(fields: [set_WorkoutExerciseId], references: [id])
+
+  @@unique([id, set_WorkoutExerciseId], name: "id")
+  @@index([set_WorkoutExerciseId], name: "set_WorkoutExerciseId")
+}
+
+model SuperSet {
+  id                 Int               @id @default(autoincrement())
+  superSet_WorkoutId Int
+  restTime           Int?
+  workout            Workout           @relation(fields: [superSet_WorkoutId], references: [id])
+  workoutExercises   WorkoutExercise[]
+
+  @@unique([id, superSet_WorkoutId], name: "id")
+  @@index([superSet_WorkoutId], name: "superSet_WorkoutId")
+}
+
+model Workout {
+  id                      Int               @id @default(autoincrement())
+  workout_UserId          Int
+  workout_RoutineFolderId Int?
+  name                    String
+  startTime               DateTime
+  endTime                 DateTime
+  isRoutine               Boolean
+  routineFolder           RoutineFolder?    @relation(fields: [workout_RoutineFolderId], references: [id])
+  user                    User              @relation(fields: [workout_UserId], references: [id])
+  superSets               SuperSet[]
+  workoutExercises        WorkoutExercise[]
+
+  @@unique([id, workout_UserId, workout_RoutineFolderId], name: "id")
+  @@index([workout_RoutineFolderId], name: "workout_RoutineFolderId")
+  @@index([workout_UserId], name: "workout_UserId")
+}
+
+model WorkoutExercise {
+  id                         Int       @id @default(autoincrement())
+  workoutExercise_WorkoutId  Int
+  workoutExercise_ExerciseId Int
+  workoutExerise_SuperSetId  Int?
+  restTime                   Int?
+  exercise                   Exercise  @relation(fields: [workoutExercise_ExerciseId], references: [id])
+  workout                    Workout   @relation(fields: [workoutExercise_WorkoutId], references: [id])
+  superSet                   SuperSet? @relation(fields: [workoutExerise_SuperSetId], references: [id])
+  sets                       Set[]
+
+  @@unique([id, workoutExercise_WorkoutId, workoutExercise_ExerciseId, workoutExerise_SuperSetId], name: "id")
+  @@index([workoutExercise_ExerciseId], name: "workoutExercise_ExerciseId")
+  @@index([workoutExercise_WorkoutId], name: "workoutExercise_WorkoutId")
+  @@index([workoutExerise_SuperSetId], name: "workoutExerise_SuperSetId")
+}
+
+enum Exercise_category {
+  Weighted
+  Bodyweight
+  AssistedBodyweight
+  WeightedBodyweight
+  Duration
+  AssistedDuration
+  WeightedDuration
+}

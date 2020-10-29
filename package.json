@@ -4,35 +4,33 @@
   "description": "Workout tracker graphql api",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
-    "build": "tsc -p .",
-    "codegen": "graphql-codegen --config codegen.yml",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/server",
+    "clean": "rm -rf dist",
+    "build": "yarn -s run clean && yarn -s run generate && tsc -p .",
+    "generate": "yarn -s run generate:prisma && yarn -s run generate:nexus",
+    "generate:prisma": "prisma introspect && prisma generate",
+    "generate:nexus": "ts-node --transpile-only src/schema",
+    "dev": "ts-node-dev --no-notify --respawn --transpileOnly src/server"
   },
   "author": "Nick Coffey",
   "license": "MIT",
   "dependencies": {
-    "@graphql-codegen/typescript-mongodb": "^1.17.8",
-    "@types/lodash": "^4.14.162",
+    "@nexus/schema": "^0.16.0",
+    "@prisma/cli": "^2.9.0",
+    "@prisma/client": "^2.9.0",
+    "@types/node-fetch": "^2.5.7",
     "apollo-server": "^2.11.0",
     "graphql": "^15.3.0",
-    "lodash": "^4.17.20",
     "log4js": "^6.3.0",
-    "mongoose": "^5.9.6"
+    "nexus-plugin-prisma": "^0.22.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "1.17.10",
-    "@graphql-codegen/introspection": "1.18.0",
-    "@graphql-codegen/typescript": "1.17.10",
-    "@graphql-codegen/typescript-resolvers": "^1.17.10",
-    "@types/mongoose": "^5.7.7",
     "@types/node": "^14.11.8",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "eslint": "^7.11.0",
-    "nodemon": "^2.0.6",
     "ts-node": "^9.0.0",
+    "ts-node-dev": "^1.0.0",
     "typescript": "^4.0.3"
   }
 }
